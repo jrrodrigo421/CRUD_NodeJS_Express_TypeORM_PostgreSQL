@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { resolve } from "path";
 import { roomRepository } from "../repositories/roomRepositorie";
+import { videoRespository } from "../repositories/videoRepositorie";
 
 export class RoomController {
   async create(req: Request, res: Response) {
@@ -21,6 +22,34 @@ export class RoomController {
       console.log(error)
       return res.status(500).json({ message: 'Error server internal' })
 
+    }
+  }
+  async createVideo(req: Request, res: Response) {
+    const { title, url, } = req.body
+    const { idRoom } = req.params
+
+    try {
+
+      const room = await roomRepository.findOneBy({ id: Number(idRoom) })
+
+      if (!room) {
+        return res.status(404).json({ message: 'Aula não existe' })
+      }
+
+      const newVideo = videoRespository.create({
+        title,
+        url,
+        room
+
+      })
+
+      await videoRespository.save(newVideo)
+      return res.status(201).json(newVideo)
+
+
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: "Internaç Server Error!" })
     }
   }
 
